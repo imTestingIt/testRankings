@@ -1,0 +1,174 @@
+@font-face {
+	font-family:'Inria Sans';
+	src:	url('InriaSans-Bold.eot');
+	src:	url('InriaSans-Bold.eot?#iefix') format('embedded-opentype'),
+			url('InriaSans-Bold.woff2') format('woff2'),
+			url('InriaSans-Bold.woff') format('woff'),
+			url('InriaSans-Bold.svg') format('svg');
+
+	font-style: normal;
+    ascent-override: 100%;
+}
+
+@font-face {
+	font-family: "Mattone-150";
+	src: url("Mattone-150.woff2") format("woff2"),
+		 url("Mattone-150.woff") format("woff");
+}
+
+body {
+    font-family: 'Inria Sans', Helvetica, sans-serif;
+    background-color:rgb(21, 21, 21);
+    margin:0;
+    color:white;
+    overflow-y: scroll; /* Show vertical scrollbar */
+    background-image: url("./M23_1323_fine.jpg");
+    background-size: cover;
+    background-position: center -175px;
+    background-attachment: fixed;
+    /*background: radial-gradient(circle, rgba(45,45,45,1) 80%, rgba(38,38,38,1) 100%);*/
+}
+
+a{
+    all:unset;
+    cursor:pointer;
+}
+
+#top-bar{
+    width: auto;
+    height: 60px;
+    background: black;
+    text-align: center;
+    vertical-align: auto;
+}
+
+.top-bar-element{
+    text-align: center;
+    vertical-align: auto;
+    margin: 10px 50px;
+    height: 50px;
+    line-height: 50px;
+    font-size: 25px;
+    display:inline
+}
+
+#series-card{
+    margin: 30px 40px;
+    width:520px;
+    display: inline-block;
+    border-radius: 15px;
+    border:solid 4px black;
+    background-color: rgba(0, 0, 0, 60%);
+    box-shadow: 0px 5px 15px black;
+}
+
+#series-card-title{
+    position:relative;
+    top:0;
+    font-size: 30px;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+    vertical-align: auto;
+    background-color: black;
+    border: 2px rgb(27, 27, 27) solid;
+    border-radius: 13px 13px 0 0;
+    background-image: url("./bg2.png");
+    background-size: cover;
+    /*box-shadow: 0px 5px 15px black;*/
+    
+}
+
+.series-card-box{
+    text-align: center;
+    vertical-align: auto;
+    margin: 10px auto;
+    width: 90%;
+    height: 50px;
+    line-height: 50px;
+    border-radius: 15px;
+    background-color: rgba(0, 0, 0, 35%);
+    font-size: 18px;
+    transition: all 0.2s;
+}
+.series-card-box:hover{
+    background-color: rgba(0, 0, 0, 55%);
+    transform: scale(1.05);
+}
+
+#liveRankingsTable{
+    width:30%;
+    margin:10px auto;
+
+    vertical-align: auto;
+    text-align: center;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+#liveRankingsTable th{
+
+    padding: 10px;
+    background-color: rgba(0, 0, 0);
+}
+
+#liveRankingsTable td{
+    padding : 8px 15px;
+}
+
+
+#liveRankingsTable tr{
+    border-bottom: 1px white solid;
+}
+
+
+#liveRankingsCategory{
+    width:10%;
+}
+#liveRankingsPosition{
+    width:5%;
+}
+#liveRankingsPoints{
+    width:7%;
+}
+#liveRankingsNumber{
+    width:10%;
+}
+
+#liveRankingsTable tr:nth-child(odd) {
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+}
+
+#liveRankingsTable tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.6);
+    color: #fff;
+}
+
+.cellLMP2{
+    background-color: rgb(0, 80, 150);
+    padding:3px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.cellLMP3{
+    background-color: rgb(102, 51, 102);
+    padding:3px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.cellGT{
+    background-color: rgb(255, 153, 0);
+    padding:3px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.pointsValue{
+    color:rgb(0, 0, 0);
+    background-color: white;
+    padding:3px;
+    border-radius: 5px;
+    font-weight: bold;
+}

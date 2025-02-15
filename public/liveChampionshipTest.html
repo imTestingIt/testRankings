@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <link rel="stylesheet" href="./main.css">
+    <title>MOTORSPORTS CORE</title>
+    <script src="./liveChampionshipTest.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+    <div id=top-bar>
+      <a href="./main.html"><div class ="top-bar-element">HOME</div></a>
+    </div>
+    
+    <select name="championships" id="selectedChampionship">
+      <option value="ALMS">ALMS</option>
+      <option value="ELMS">ELMS</option>
+      <option value="IMSA">IMSA</option>
+      <option value="WEC">WEC</option>
+    </select>
+    <button id="getRankings">GET CHAMPIONSHIP STANDINGS</button>
+
+    <button id="getLiveStandings">GET LIVE RANKINGS</button>
+
+    <div>
+      <table id="liveRankingsTable">
+        <tbody id="liveRankings">
+        <tr>
+          <th id="liveRankingsCategory">CATEGORY</th>
+          <th id="liveRankingsPosition">POS.</th>
+          <th id="liveRankingsNumber">CAR</th>
+          <th>TEAM</th>
+          <th id="liveRankingsPoints">POINTS</th>
+        </tr>
+        <tr>
+          <td><span class="cellLMP2">1</span></td>
+          <td>1</td>
+          <td>1</td>
+          <td>1</td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td><span class="cellLMP3">2</span></td>
+          <td>2</td>
+          <td>2</td>
+          <td>2</td>
+          <td>2</td>
+        </tr>
+        <tr>
+          <td><span class="cellGT">3</span></td>
+          <td>3</td>
+          <td>3</td>
+          <td>3</td>
+          <td>3</td>
+        </tr>
+      </tbody>
+        </table>
+    </div>
+    <div>
+    <div id="data" style="float:left; margin-top:20px;width:40%; background:black">CHAMPIONSHIP STANDING</div>
+    
+    <div id="data2" style="float:right;margin-top:20px;width:40%; background:rgb(87, 0, 0)">LIVE RANKINGS</div>
+    </div>
+
+
+  </body>
+</html>
