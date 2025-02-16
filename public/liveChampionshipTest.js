@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           JSON.stringify(currentChampionshipRankings)
         );
 
-        console.log("getCurrentChampionshipStandings done lct js");
+        //console.log("getCurrentChampionshipStandings done lct js");
       }
     );
   }
@@ -84,10 +84,10 @@ document.addEventListener("DOMContentLoaded", async function () {
       currentChampionshipRankings.length < 1 ||
       !currentChampionshipRankings
     ) {
-      console.log("no cc data");
+      //console.log("no cc data");
       await getCurrentChampionshipStandings(selectedChampionship);
     } else {
-      console.log("cc data loaded");
+      //console.log("cc data loaded");
     }
 
     let status = document.getElementById("requestStatus");
@@ -192,7 +192,8 @@ document.addEventListener("DOMContentLoaded", async function () {
           updateLiveRankingsDisplay("LMP2", LMP2ChampionshipRankings, "1");
           updateLiveRankingsDisplay("LMP3", LMP3ChampionshipRankings, "2");
           updateLiveRankingsDisplay("GT", GTChampionshipRankings, "3");
-          console.log("getLiveStandings done lct js");
+
+          //console.log("getLiveStandings done lct js");
           status.innerHTML = "";
         } catch (error) {
           console.error(error);

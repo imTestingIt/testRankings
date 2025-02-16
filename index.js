@@ -3,6 +3,7 @@
 // Chargement des modules
 var express = require("express");
 const puppeteer = require("puppeteer");
+const cheerio = require("cheerio");
 
 var app = express();
 const server = require("http").createServer(app);
@@ -23,13 +24,22 @@ function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+let browser;
+
+/*
+const $ = cheerio.load('<div class="standings-tabs ui-tabs ui-corner-all ui-widget ui-widget-content">');
+*/
+
 async function championshipRankingsScrap(championship) {
   let url =
     championship == "ALMS"
       ? "https://www.asianlemansseries.com/calendar/2024-2025/teams-championship"
       : "";
 
-  const browser = await puppeteer.launch();
+  if (!browser) {
+    browser = await puppeteer.launch();
+  }
+
   const page = await browser.newPage();
   await page.goto(url, {
     waitUntil: "domcontentloaded",
@@ -79,7 +89,6 @@ async function championshipRankingsScrap(championship) {
     infos.push(info);
   }
   await page.close();
-  await browser.close();
 
   return infos;
 }
@@ -88,7 +97,9 @@ async function liveStandingsScrap(championship) {
   let url =
     championship == "ALMS" ? "https://live.asianlemansseries.com/en/live" : "";
 
-  const browser = await puppeteer.launch();
+  if (!browser) {
+    browser = await puppeteer.launch();
+  }
   const page = await browser.newPage();
   await page.goto(url, {
     waitUntil: "domcontentloaded",
@@ -130,7 +141,6 @@ async function liveStandingsScrap(championship) {
   }
 
   await page.close();
-  await browser.close();
 
   return [
     { class: "LMP2", cars: LMP2 },
