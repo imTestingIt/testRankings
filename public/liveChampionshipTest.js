@@ -3,7 +3,7 @@ var pointsPerPosition = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
 var additionnalPoints = [
   { number: 22, points: 1 },
   { number: 49, points: 1 },
-  { number: 81, points: 1 },
+  { number: 2, points: 1 },
 ];
 
 var currentChampionshipRankings = [];
@@ -32,8 +32,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     //console.log("cc : " + JSON.stringify(currentChampionshipRankings));
   }
 
-  function updateLiveRankingsDisplay(category, rankings) {
-    let liveRankingsTable = document.getElementById("liveRankings");
+  function updateLiveRankingsDisplay(category, rankings, table) {
+    let tableSelector = "liveRankings " + table;
+    let liveRankingsTable = document.getElementsByClassName(tableSelector)[0];
     for (let i = 0; i < rankings.length; i++) {
       liveRankingsTable.innerHTML +=
         '<tr><td><span class="cell' +
@@ -52,29 +53,61 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   }
 
+  async function getCurrentChampionshipStandings(selectedChampionship) {
+    socket.emit(
+      "getCurrentChampionshipStandings",
+      selectedChampionship,
+      function (championshipRankings) {
+        currentChampionshipRankings = championshipRankings;
+
+        localStorage.setItem(
+          "currentChampionshipRankings",
+          JSON.stringify(currentChampionshipRankings)
+        );
+
+        console.log("getCurrentChampionshipStandings done lct js");
+      }
+    );
+  }
+
   load();
 
-  let getRankings = document.getElementById("getRankings");
   let getLiveStandings = document.getElementById("getLiveStandings");
   let selectedChampionship = document.getElementById(
     "selectedChampionship"
   ).value;
 
-  getLiveStandings.onclick = function () {
-    let liveRankingsTable = document.getElementById("liveRankings");
-    liveRankingsTable.innerHTML =
-      '<tr><th id="liveRankingsCategory">CATEGORY</th><th id="liveRankingsPosition">POS.</th><th id="liveRankingsNumber">CAR</th><th>TEAM</th><th id="liveRankingsPoints">POINTS</th></tr>';
+  selectedChampionship = "ALMS";
 
-    let data2 = document.getElementById("data2");
+  getLiveStandings.onclick = async function () {
+    if (
+      currentChampionshipRankings.length < 1 ||
+      !currentChampionshipRankings
+    ) {
+      console.log("no cc data");
+      await getCurrentChampionshipStandings(selectedChampionship);
+    } else {
+      console.log("cc data loaded");
+    }
 
-    data2.innerHTML = "Loading " + selectedChampionship + " live rankings...";
+    let status = document.getElementById("requestStatus");
+    status.innerHTML = "Chargement...";
+
+    let liveRankingsTable = document.querySelectorAll(".liveRankings");
+    for (let i = 0; i < liveRankingsTable.length; i++) {
+      liveRankingsTable[i].innerHTML =
+        '<tr><th id="liveRankingsCategory">CAT.</th><th id="liveRankingsPosition">POS.</th><th id="liveRankingsNumber">CAR</th><th>TEAM</th><th id="liveRankingsPoints">PTS.</th></tr>';
+    }
+
+    setTimeout(function () {}, 1000);
     socket.emit(
       "getLiveStandings",
       selectedChampionship,
       function (liveStandings) {
-        currentLiveStandings = liveStandings;
+        try {
+          currentLiveStandings = liveStandings;
 
-        /*
+          /*
         console.log(liveStandings[0].class);
         console.log(liveStandings[0].cars[0].position);
         
@@ -88,115 +121,83 @@ document.addEventListener("DOMContentLoaded", async function () {
           }
         }
         */
-        data2.innerHTML = "Loading completed";
 
-        var updatedChampionshipStandings = structuredClone(
-          currentChampionshipRankings
-        );
+          var updatedChampionshipStandings = structuredClone(
+            currentChampionshipRankings
+          );
 
-        for (let i = 0; i < 3; i++) {
-          for (let j = 0; j < 10; j++) {
-            let currentCar = liveStandings[i].cars[j];
-            if (currentCar == undefined) {
-              continue;
+          for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 10; j++) {
+              let currentCar = liveStandings[i].cars[j];
+              if (currentCar == undefined) {
+                continue;
+              }
+
+              const carToUpdate = updatedChampionshipStandings.find(
+                (element) => element.number == currentCar.number
+              );
+              let indexOfCarToUpdate =
+                updatedChampionshipStandings.indexOf(carToUpdate);
+
+              //console.log(JSON.stringify(carToUpdate));
+
+              carToUpdate.point =
+                parseFloat(carToUpdate.point) +
+                parseFloat(pointsPerPosition[j]);
+
+              updatedChampionshipStandings[indexOfCarToUpdate] = carToUpdate;
             }
+          }
 
+          for (let k = 0; k < additionnalPoints.length; k++) {
             const carToUpdate = updatedChampionshipStandings.find(
-              (element) => element.number == currentCar.number
+              (element) => element.number == additionnalPoints[k].number
             );
+
             let indexOfCarToUpdate =
               updatedChampionshipStandings.indexOf(carToUpdate);
 
             carToUpdate.point =
-              parseFloat(carToUpdate.point) + parseFloat(pointsPerPosition[j]);
+              parseFloat(carToUpdate.point) +
+              parseFloat(additionnalPoints[k].points);
 
             updatedChampionshipStandings[indexOfCarToUpdate] = carToUpdate;
           }
-        }
 
-        for (let k = 0; k < additionnalPoints.length; k++) {
-          const carToUpdate = updatedChampionshipStandings.find(
-            (element) => element.number == additionnalPoints[k].number
-          );
-
-          let indexOfCarToUpdate =
-            updatedChampionshipStandings.indexOf(carToUpdate);
-
-          carToUpdate.point =
-            parseFloat(carToUpdate.point) +
-            parseFloat(additionnalPoints[k].points);
-
-          updatedChampionshipStandings[indexOfCarToUpdate] = carToUpdate;
-        }
-
-        LMP2ChampionshipRankings = [];
-        LMP3ChampionshipRankings = [];
-        GTChampionshipRankings = [];
-        for (let k = 0; k < updatedChampionshipStandings.length; k++) {
-          if (updatedChampionshipStandings[k].category == "LMP2") {
-            LMP2ChampionshipRankings.push(updatedChampionshipStandings[k]);
-          } else {
-            if (updatedChampionshipStandings[k].category == "LMP3") {
-              LMP3ChampionshipRankings.push(updatedChampionshipStandings[k]);
+          LMP2ChampionshipRankings = [];
+          LMP3ChampionshipRankings = [];
+          GTChampionshipRankings = [];
+          for (let k = 0; k < updatedChampionshipStandings.length; k++) {
+            if (updatedChampionshipStandings[k].category == "LMP2") {
+              LMP2ChampionshipRankings.push(updatedChampionshipStandings[k]);
             } else {
-              GTChampionshipRankings.push(updatedChampionshipStandings[k]);
+              if (updatedChampionshipStandings[k].category == "LMP3") {
+                LMP3ChampionshipRankings.push(updatedChampionshipStandings[k]);
+              } else {
+                GTChampionshipRankings.push(updatedChampionshipStandings[k]);
+              }
             }
           }
-        }
 
-        LMP2ChampionshipRankings.sort(comparePoints);
-        LMP3ChampionshipRankings.sort(comparePoints);
-        GTChampionshipRankings.sort(comparePoints);
+          LMP2ChampionshipRankings.sort(comparePoints);
+          LMP3ChampionshipRankings.sort(comparePoints);
+          GTChampionshipRankings.sort(comparePoints);
 
-        /*
+          /*
         console.log("updated P2: " + JSON.stringify(LMP2ChampionshipRankings));
         console.log("updated P3: " + JSON.stringify(LMP3ChampionshipRankings));
         console.log("updated GT: " + JSON.stringify(GTChampionshipRankings));
         */
 
-        updateLiveRankingsDisplay("LMP2", LMP2ChampionshipRankings);
-        updateLiveRankingsDisplay("LMP3", LMP3ChampionshipRankings);
-        updateLiveRankingsDisplay("GT", GTChampionshipRankings);
-      }
-    );
-  };
-
-  getRankings.onclick = function () {
-    let data = document.getElementById("data");
-
-    data.innerHTML =
-      "Loading " + selectedChampionship + " championship standings...";
-
-    socket.emit(
-      "lancerScrapping",
-      selectedChampionship,
-      function (championshipRankings) {
-        //console.log(JSON.stringify(championshipRankings));
-        currentChampionshipRankings = championshipRankings;
-        /*
-        data.innerHTML = "";
-        for (let i = 0; i < championshipRankings.length; i++) {
-          data.innerHTML +=
-            "<div>[" +
-            championshipRankings[i].category +
-            "] " +
-            championshipRankings[i].position +
-            " - " +
-            championshipRankings[i].team +
-            " (" +
-            championshipRankings[i].number +
-            ") " +
-            "  - " +
-            championshipRankings[i].point +
-            "pts ------ " +
-            "</div>";
+          updateLiveRankingsDisplay("LMP2", LMP2ChampionshipRankings, "1");
+          updateLiveRankingsDisplay("LMP3", LMP3ChampionshipRankings, "2");
+          updateLiveRankingsDisplay("GT", GTChampionshipRankings, "3");
+          console.log("getLiveStandings done lct js");
+          status.innerHTML = "";
+        } catch (error) {
+          console.error(error);
+          status.innerHTML = "Une erreur est survenue";
         }
-        */
-        data.innerHTML = "Loading completed";
-        localStorage.setItem(
-          "currentChampionshipRankings",
-          JSON.stringify(currentChampionshipRankings)
-        );
       }
     );
   };

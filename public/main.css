@@ -18,14 +18,10 @@
 
 body {
     font-family: 'Inria Sans', Helvetica, sans-serif;
-    background-color:rgb(21, 21, 21);
+    background-color:rgb(54, 54, 54);
     margin:0;
     color:white;
     overflow-y: scroll; /* Show vertical scrollbar */
-    background-image: url("./M23_1323_fine.jpg");
-    background-size: cover;
-    background-position: center -175px;
-    background-attachment: fixed;
     /*background: radial-gradient(circle, rgba(45,45,45,1) 80%, rgba(38,38,38,1) 100%);*/
 }
 
@@ -98,11 +94,11 @@ a{
 
 #liveRankingsTable{
     width:30%;
-    margin:10px auto;
-
+    margin:10px 25px;
     vertical-align: auto;
     text-align: center;
     font-family: Arial, Helvetica, sans-serif;
+    float:left
 }
 
 #liveRankingsTable th{
@@ -171,4 +167,24 @@ a{
     padding:3px;
     border-radius: 5px;
     font-weight: bold;
+}
+
+#getLiveStandings{
+    background-color: white;
+    border-radius: 10px;
+    font-size: 30px;
+    font-weight: bold;
+    vertical-align: auto;
+    text-align: center;
+    margin: 10px 0;
+    cursor:pointer
+}
+
+#getLiveStandings:hover{
+    background-color: rgb(160, 160, 160);
+}
+
+#requestStatus{
+    text-align:center;
+    font-size: 20px;
 }

@@ -16,7 +16,7 @@ server.listen(8080, function () {
 app.use(express.static("public"));
 
 app.get("/", function (req, res) {
-  res.sendFile(__dirname + "/public/main.html");
+  res.sendFile(__dirname + "/public/liveChampionshipTest.html");
 });
 
 function delay(ms) {
@@ -86,9 +86,7 @@ async function championshipRankingsScrap(championship) {
 
 async function liveStandingsScrap(championship) {
   let url =
-    championship == "ALMS"
-      ? "https://live.asianlemansseries.com/en/replay/7637"
-      : "";
+    championship == "ALMS" ? "https://live.asianlemansseries.com/en/live" : "";
 
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
@@ -144,11 +142,15 @@ async function liveStandingsScrap(championship) {
 io.on("connection", function (socket) {
   console.log("Un utilisateur s'est connecté.");
 
-  socket.on("lancerScrapping", async (championship, callback) => {
-    console.log("getRankings clicked");
-    let championshipRankings = await championshipRankingsScrap(championship);
-    callback(championshipRankings);
-  });
+  socket.on(
+    "getCurrentChampionshipStandings",
+    async (championship, callback) => {
+      console.log("getCurrentChampionshipStandings requested");
+      let championshipRankings = await championshipRankingsScrap(championship);
+      callback(championshipRankings);
+      console.log("getCurrentChampionshipStandings done index js");
+    }
+  );
 
   socket.on("getLiveStandings", async (championship, callback) => {
     console.log("getLiveStandings clicked");

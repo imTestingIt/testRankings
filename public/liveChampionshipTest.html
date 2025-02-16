@@ -10,59 +10,55 @@
     <script src="/socket.io/socket.io.js"></script>
   </head>
   <body>
-    <div id=top-bar>
-      <a href="./main.html"><div class ="top-bar-element">HOME</div></a>
-    </div>
-    
-    <select name="championships" id="selectedChampionship">
+    <div style="text-align:center">
+    <select name="championships" id="selectedChampionship" style="display:none">
       <option value="ALMS">ALMS</option>
       <option value="ELMS">ELMS</option>
       <option value="IMSA">IMSA</option>
       <option value="WEC">WEC</option>
     </select>
-    <button id="getRankings">GET CHAMPIONSHIP STANDINGS</button>
+    <button id="getRankings" style="display:none">GET CHAMPIONSHIP STANDINGS</button>
 
-    <button id="getLiveStandings">GET LIVE RANKINGS</button>
-
+    <button id="getLiveStandings">METTRE À JOUR</button>
+  </div>
+  <div id="requestStatus"></div>
     <div>
       <table id="liveRankingsTable">
-        <tbody id="liveRankings">
+        <tbody class="liveRankings 1">
         <tr>
-          <th id="liveRankingsCategory">CATEGORY</th>
+          <th id="liveRankingsCategory">CAT.</th>
           <th id="liveRankingsPosition">POS.</th>
           <th id="liveRankingsNumber">CAR</th>
           <th>TEAM</th>
-          <th id="liveRankingsPoints">POINTS</th>
+          <th id="liveRankingsPoints">PTS.</th>
         </tr>
-        <tr>
-          <td><span class="cellLMP2">1</span></td>
-          <td>1</td>
-          <td>1</td>
-          <td>1</td>
-          <td>1</td>
-        </tr>
-        <tr>
-          <td><span class="cellLMP3">2</span></td>
-          <td>2</td>
-          <td>2</td>
-          <td>2</td>
-          <td>2</td>
-        </tr>
-        <tr>
-          <td><span class="cellGT">3</span></td>
-          <td>3</td>
-          <td>3</td>
-          <td>3</td>
-          <td>3</td>
-        </tr>
-      </tbody>
+        </tbody>
         </table>
+        <table id="liveRankingsTable">
+          <tbody class="liveRankings 2">
+          <tr>
+            <th id="liveRankingsCategory">CAT.</th>
+            <th id="liveRankingsPosition">POS.</th>
+            <th id="liveRankingsNumber">CAR</th>
+            <th>TEAM</th>
+            <th id="liveRankingsPoints">PTS.</th>
+          </tr>
+          </tbody>
+          </table>
+          <table id="liveRankingsTable">
+            <tbody class="liveRankings 3">
+            <tr>
+              <th id="liveRankingsCategory">CAT.</th>
+              <th id="liveRankingsPosition">POS.</th>
+              <th id="liveRankingsNumber">CAR</th>
+              <th>TEAM</th>
+              <th id="liveRankingsPoints">PTS.</th>
+            </tr>
+            </tbody>
+            </table>
     </div>
-    <div>
-    <div id="data" style="float:left; margin-top:20px;width:40%; background:black">CHAMPIONSHIP STANDING</div>
-    
-    <div id="data2" style="float:right;margin-top:20px;width:40%; background:rgb(87, 0, 0)">LIVE RANKINGS</div>
-    </div>
+
+
 
 
   </body>
