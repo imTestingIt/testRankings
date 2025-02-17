@@ -4,6 +4,10 @@
 var express = require("express");
 const puppeteer = require("puppeteer");
 const cheerio = require("cheerio");
+const axios = require("axios");
+const jsdom = require("jsdom");
+const got = require("got");
+const { JSDOM } = jsdom;
 
 var app = express();
 const server = require("http").createServer(app);
@@ -24,7 +28,7 @@ function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-let browser;
+var browser;
 
 /*
 const $ = cheerio.load('<div class="standings-tabs ui-tabs ui-corner-all ui-widget ui-widget-content">');
@@ -37,7 +41,7 @@ async function championshipRankingsScrap(championship) {
       : "";
 
   if (!browser) {
-    browser = await puppeteer.launch();
+    browser = await puppeteer.launch({ headless: true });
   }
 
   const page = await browser.newPage();
@@ -95,10 +99,12 @@ async function championshipRankingsScrap(championship) {
 
 async function liveStandingsScrap(championship) {
   let url =
-    championship == "ALMS" ? "https://live.asianlemansseries.com/en/live" : "";
+    championship == "ALMS"
+      ? "https://live.asianlemansseries.com/en/replay/7638"
+      : "";
 
   if (!browser) {
-    browser = await puppeteer.launch();
+    browser = await puppeteer.launch({ headless: true });
   }
   const page = await browser.newPage();
   await page.goto(url, {
@@ -149,6 +155,104 @@ async function liveStandingsScrap(championship) {
   ];
 }
 
+async function fetchCurrentChampionshipStandings(url) {
+  try {
+    const { data } = await axios.get(url);
+    console.log(`Fetched from network: ${url}`);
+
+    await extractRows(data);
+    return 0;
+  } catch (error) {
+    console.error("Error fetching the HTML:", error);
+    throw error;
+  }
+}
+
+async function fetchLiveStandings(url) {
+  try {
+    const { data } = await axios.get(url);
+    console.log(`Fetched from network: ${url}`);
+
+    await extractLiveStandings(data);
+
+    return 0;
+  } catch (error) {
+    console.error("Error fetching the HTML:", error);
+    throw error;
+  }
+}
+
+async function extractRows(html) {
+  const $ = cheerio.load(html);
+  const rows = [];
+
+  $(".row").each((index, element) => {
+    const pos = $(element).find(".pos").text().trim();
+    const number = $(element).find(".number").text().trim();
+    const team = $(element).find(".team").text().trim();
+    const car = $(element).find(".car").text().trim();
+    const cat = $(element).find(".cat").text().trim();
+    const pts = $(element).find(".pts").text().trim();
+    if (pos == "" || team == "") {
+    } else {
+      let row = {
+        position: pos,
+        number: number,
+        team: team,
+        car: car,
+        category: cat,
+        point: pts,
+      };
+      rows.push(row);
+    }
+  });
+
+  console.log(JSON.stringify(rows));
+  return rows;
+}
+
+async function extractLiveStandings(html) {
+  const $ = cheerio.load(html);
+
+  let LMP2 = [];
+  let LMP3 = [];
+  let GT = [];
+
+  $(".table-race").each((index, element) => {
+    console.log("yee");
+    const pos = $(element).find(".pos").text().trim();
+    const number = $(element).find(".ranking").text().trim();
+    const classs = $(element).find(".class").text().trim();
+
+    if (pos == "" || number == "") {
+    } else {
+      let row = {
+        position: pos,
+        number: number,
+        class: classs,
+      };
+
+      if (classs == "LM P2") {
+        LMP2.push(row);
+      } else {
+        if (classs == "LM P3") {
+          LMP3.push(row);
+        } else {
+          GT.push(row);
+        }
+      }
+    }
+  });
+
+  console.log(JSON.stringify(LMP2));
+
+  return [
+    { class: "LMP2", cars: LMP2 },
+    { class: "LMP3", cars: LMP3 },
+    { class: "GT", cars: GT },
+  ];
+}
+
 io.on("connection", function (socket) {
   console.log("Un utilisateur s'est connecté.");
 
@@ -157,6 +261,7 @@ io.on("connection", function (socket) {
     async (championship, callback) => {
       console.log("getCurrentChampionshipStandings requested");
       let championshipRankings = await championshipRankingsScrap(championship);
+
       callback(championshipRankings);
       console.log("getCurrentChampionshipStandings done index js");
     }
@@ -169,4 +274,57 @@ io.on("connection", function (socket) {
 
     callback(liveStandings);
   });
+
+  /*
+  fetchCurrentChampionshipStandings(
+    "https://www.asianlemansseries.com/calendar/2024-2025/teams-championship"
+  );*/
+
+  //fetchLiveStandings("https://live.asianlemansseries.com/en/live");
+
+  async function fetchPage(url) {
+    const response = await got(url);
+    const dom = new JSDOM(response.body, {
+      runScripts: "dangerously",
+    });
+
+    return new Promise((resolve) => {
+      dom.window.addEventListener("load", () => {
+        resolve(dom);
+      });
+    });
+  }
+
+  const url =
+    "https://www.asianlemansseries.com/calendar/2024-2025/teams-championship";
+
+  function waitForScripts(dom, timeout = 1000) {
+    return new Promise((resolve) => {
+      dom.window.addEventListener("load", () => {
+        resolve(dom);
+      });
+    });
+  }
+
+  async function scrapePage(url) {
+    try {
+      const response = await fetch(url);
+      const html = await response.text();
+
+      // Créer une instance JSDOM avec exécution des scripts
+      const dom = new JSDOM(html, { runScripts: "dangerously" });
+
+      // Attendre un délai pour laisser le temps aux scripts de s'exécuter
+      const document = await waitForScripts(dom);
+
+      // Extraire les données
+      const titles = document.querySelectorAll("h1");
+      titles.forEach((title) => {
+        console.log(title.textContent);
+      });
+    } catch (error) {
+      console.error("Erreur lors du scraping :", error);
+    }
+  }
+  //scrapePage("https://live.asianlemansseries.com/en/replay/7638");
 });

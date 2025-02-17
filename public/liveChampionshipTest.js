@@ -99,7 +99,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         '<tr><th id="liveRankingsCategory">CAT.</th><th id="liveRankingsPosition">POS.</th><th id="liveRankingsNumber">CAR</th><th>TEAM</th><th id="liveRankingsPoints">PTS.</th></tr>';
     }
 
-    setTimeout(function () {}, 1000);
+    setTimeout(function () {}, 3000);
     socket.emit(
       "getLiveStandings",
       selectedChampionship,
