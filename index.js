@@ -9,6 +9,8 @@ const jsdom = require("jsdom");
 const got = require("got");
 const { JSDOM } = jsdom;
 
+const { chromium } = require("playwright");
+
 var app = express();
 const server = require("http").createServer(app);
 const io = require("socket.io")(server);
@@ -219,7 +221,6 @@ async function extractLiveStandings(html) {
   let GT = [];
 
   $(".table-race").each((index, element) => {
-    console.log("yee");
     const pos = $(element).find(".pos").text().trim();
     const number = $(element).find(".ranking").text().trim();
     const classs = $(element).find(".class").text().trim();
@@ -253,6 +254,78 @@ async function extractLiveStandings(html) {
   ];
 }
 
+async function fetchLiveStandings2() {
+  const browser = await chromium.launch({ headless: true });
+  const page = await browser.newPage();
+  let LMP2 = [];
+  let LMP3 = [];
+  let GT = [];
+  try {
+    // Navigation vers la page
+    await page.goto("https://live.asianlemansseries.com/en/replay/7638", {
+      waitUntil: "networkidle",
+    });
+
+    // Attente du chargement du tableau des résultats
+    await page.waitForSelector(".openTeamModal", { timeout: 10000 });
+
+    // Extraction des données
+    const results = await page.evaluate(() => {
+      const rows = Array.from(document.querySelectorAll(".openTeamModal"));
+      return rows.map((row) => {
+        const cells = row.querySelectorAll("td");
+        return {
+          pos: cells[0]?.textContent.trim(),
+          number: cells[1]?.textContent.trim(),
+          classs: cells[3]?.textContent.trim(),
+        };
+      });
+    });
+
+    // Affichage des résultats
+    console.log("Résultats de la course :");
+
+    for (let i = 0; i < results.length; i++) {
+      let info = {
+        position: results[i].pos,
+        number: results[i].number,
+        class: results[i].classs,
+      };
+
+      if (results[i].classs == "LM P2") {
+        LMP2.push(info);
+      } else {
+        if (results[i].classs == "LM P3") {
+          LMP3.push(info);
+        } else {
+          GT.push(info);
+        }
+      }
+    }
+
+    /*
+    results.forEach((result, index) => {
+      console.log(`\nLigne ${index + 1}:`);
+      console.log(`Position: ${result.position}`);
+      console.log(`Numéro: ${result.carNumber}`);
+      console.log(`Équipe: ${result.team}`);
+      console.log(`Pilotes: ${result.drivers}`);
+    });
+*/
+  } catch (error) {
+    console.error("Erreur lors du scraping:", error);
+  } finally {
+    // Fermeture du navigateur
+    await browser.close();
+  }
+
+  return [
+    { class: "LMP2", cars: LMP2 },
+    { class: "LMP3", cars: LMP3 },
+    { class: "GT", cars: GT },
+  ];
+}
+
 io.on("connection", function (socket) {
   console.log("Un utilisateur s'est connecté.");
 
@@ -270,7 +343,7 @@ io.on("connection", function (socket) {
   socket.on("getLiveStandings", async (championship, callback) => {
     console.log("getLiveStandings clicked");
 
-    let liveStandings = await liveStandingsScrap(championship);
+    let liveStandings = await fetchLiveStandings2();
 
     callback(liveStandings);
   });
@@ -281,50 +354,4 @@ io.on("connection", function (socket) {
   );*/
 
   //fetchLiveStandings("https://live.asianlemansseries.com/en/live");
-
-  async function fetchPage(url) {
-    const response = await got(url);
-    const dom = new JSDOM(response.body, {
-      runScripts: "dangerously",
-    });
-
-    return new Promise((resolve) => {
-      dom.window.addEventListener("load", () => {
-        resolve(dom);
-      });
-    });
-  }
-
-  const url =
-    "https://www.asianlemansseries.com/calendar/2024-2025/teams-championship";
-
-  function waitForScripts(dom, timeout = 1000) {
-    return new Promise((resolve) => {
-      dom.window.addEventListener("load", () => {
-        resolve(dom);
-      });
-    });
-  }
-
-  async function scrapePage(url) {
-    try {
-      const response = await fetch(url);
-      const html = await response.text();
-
-      // Créer une instance JSDOM avec exécution des scripts
-      const dom = new JSDOM(html, { runScripts: "dangerously" });
-
-      // Attendre un délai pour laisser le temps aux scripts de s'exécuter
-      const document = await waitForScripts(dom);
-
-      // Extraire les données
-      const titles = document.querySelectorAll("h1");
-      titles.forEach((title) => {
-        console.log(title.textContent);
-      });
-    } catch (error) {
-      console.error("Erreur lors du scraping :", error);
-    }
-  }
-  //scrapePage("https://live.asianlemansseries.com/en/replay/7638");
 });

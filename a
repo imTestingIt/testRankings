@@ -1,0 +1,45 @@
+async function fetchPage(url) {
+  const response = await got(url);
+  const dom = new JSDOM(response.body, {
+    runScripts: "dangerously",
+  });
+
+  return new Promise((resolve) => {
+    dom.window.addEventListener("load", () => {
+      resolve(dom);
+    });
+  });
+}
+
+const url =
+  "https://www.asianlemansseries.com/calendar/2024-2025/teams-championship";
+
+function waitForScripts(dom, timeout = 1000) {
+  return new Promise((resolve) => {
+    dom.window.addEventListener("load", () => {
+      resolve(dom);
+    });
+  });
+}
+
+async function scrapePage(url) {
+  try {
+    const response = await fetch(url);
+    const html = await response.text();
+
+    // Créer une instance JSDOM avec exécution des scripts
+    const dom = new JSDOM(html, { runScripts: "dangerously" });
+
+    // Attendre un délai pour laisser le temps aux scripts de s'exécuter
+    const document = await waitForScripts(dom);
+
+    // Extraire les données
+    const titles = document.querySelectorAll("h1");
+    titles.forEach((title) => {
+      console.log(title.textContent);
+    });
+  } catch (error) {
+    console.error("Erreur lors du scraping :", error);
+  }
+}
+//scrapePage("https://live.asianlemansseries.com/en/replay/7638");
