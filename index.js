@@ -254,6 +254,48 @@ async function extractLiveStandings(html) {
   ];
 }
 
+async function fetchCurrentChampionshipStandings2() {
+  const browser = await chromium.launch({ headless: true });
+  const page = await browser.newPage();
+
+  let infos = [];
+  try {
+    // Navigation vers la page
+    await page.goto(
+      "https://www.asianlemansseries.com/calendar/2024-2025/teams-championship",
+      {
+        waitUntil: "networkidle",
+      }
+    );
+
+    // Attente du chargement du tableau des résultats
+    await page.waitForSelector(".table-results", { timeout: 10000 });
+
+    // Extraction des données
+    const results = await page.evaluate(() => {
+      const infos = Array.from(document.querySelectorAll(".table-results"));
+      return infos.map((row) => {
+        const cells = row.querySelectorAll("row");
+        return {
+          pos: cells[0]?.textContent.trim(),
+          number: cells[1]?.textContent.trim(),
+          team: cells[2]?.textContent.trim(),
+          cat: cells[5]?.textContent.trim(),
+          car: cells[4]?.textContent.trim(),
+          pts: cells[12]?.textContent.trim(),
+        };
+      });
+    });
+  } catch (error) {
+    console.error("Erreur lors du scraping:", error);
+  } finally {
+    // Fermeture du navigateur
+    await browser.close();
+  }
+
+  return infos;
+}
+
 async function fetchLiveStandings2() {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
@@ -334,6 +376,7 @@ io.on("connection", function (socket) {
     async (championship, callback) => {
       console.log("getCurrentChampionshipStandings requested");
       let championshipRankings = await championshipRankingsScrap(championship);
+      //let championshipRankings = await fetchCurrentChampionshipStandings2();
 
       callback(championshipRankings);
       console.log("getCurrentChampionshipStandings done index js");
@@ -342,7 +385,7 @@ io.on("connection", function (socket) {
 
   socket.on("getLiveStandings", async (championship, callback) => {
     console.log("getLiveStandings clicked");
-
+    //let liveStandings = await liveStandingsScrap(championship);
     let liveStandings = await fetchLiveStandings2();
 
     callback(liveStandings);
