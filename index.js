@@ -157,13 +157,14 @@ async function liveStandingsScrap(championship) {
   ];
 }
 
-async function fetchCurrentChampionshipStandings(url) {
+async function fetchCurrentChampionshipStandings() {
+  let url =
+    "https://www.asianlemansseries.com/calendar/2024-2025/teams-championship";
   try {
     const { data } = await axios.get(url);
     console.log(`Fetched from network: ${url}`);
 
-    await extractRows(data);
-    return 0;
+    return await extractRows(data);
   } catch (error) {
     console.error("Error fetching the HTML:", error);
     throw error;
@@ -190,7 +191,7 @@ async function extractRows(html) {
 
   $(".row").each((index, element) => {
     const pos = $(element).find(".pos").text().trim();
-    const number = $(element).find(".number").text().trim();
+    const number = $(element).find(".number").text().trim().replace(/#/g, "");
     const team = $(element).find(".team").text().trim();
     const car = $(element).find(".car").text().trim();
     const cat = $(element).find(".cat").text().trim();
@@ -375,8 +376,8 @@ io.on("connection", function (socket) {
     "getCurrentChampionshipStandings",
     async (championship, callback) => {
       console.log("getCurrentChampionshipStandings requested");
-      let championshipRankings = await championshipRankingsScrap(championship);
-      //let championshipRankings = await fetchCurrentChampionshipStandings2();
+      //let championshipRankings = await championshipRankingsScrap(championship);
+      let championshipRankings = await fetchCurrentChampionshipStandings();
 
       callback(championshipRankings);
       console.log("getCurrentChampionshipStandings done index js");

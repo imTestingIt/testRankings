@@ -125,7 +125,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           var updatedChampionshipStandings = structuredClone(
             currentChampionshipRankings
           );
-
+          console.log("ucs " + JSON.stringify(updatedChampionshipStandings));
           for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 10; j++) {
               let currentCar = liveStandings[i].cars[j];
@@ -139,7 +139,7 @@ document.addEventListener("DOMContentLoaded", async function () {
               let indexOfCarToUpdate =
                 updatedChampionshipStandings.indexOf(carToUpdate);
 
-              //console.log(JSON.stringify(carToUpdate));
+              console.log("ctu " + JSON.stringify(carToUpdate));
 
               carToUpdate.point =
                 parseFloat(carToUpdate.point) +
