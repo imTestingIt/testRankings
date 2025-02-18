@@ -26,16 +26,8 @@ app.get("/", function (req, res) {
   res.sendFile(__dirname + "/public/liveChampionshipTest.html");
 });
 
-function delay(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
+/**PUPPETEER */
 var browser;
-
-/*
-const $ = cheerio.load('<div class="standings-tabs ui-tabs ui-corner-all ui-widget ui-widget-content">');
-*/
-
 async function championshipRankingsScrap(championship) {
   let url =
     championship == "ALMS"
@@ -98,7 +90,6 @@ async function championshipRankingsScrap(championship) {
 
   return infos;
 }
-
 async function liveStandingsScrap(championship) {
   let url =
     championship == "ALMS"
@@ -157,6 +148,7 @@ async function liveStandingsScrap(championship) {
   ];
 }
 
+/**CHEERIO */
 async function fetchCurrentChampionshipStandings() {
   let url =
     "https://www.asianlemansseries.com/calendar/2024-2025/teams-championship";
@@ -164,28 +156,13 @@ async function fetchCurrentChampionshipStandings() {
     const { data } = await axios.get(url);
     console.log(`Fetched from network: ${url}`);
 
-    return await extractRows(data);
+    return await extractCurrentChampionshipStandings(data);
   } catch (error) {
     console.error("Error fetching the HTML:", error);
     throw error;
   }
 }
-
-async function fetchLiveStandings(url) {
-  try {
-    const { data } = await axios.get(url);
-    console.log(`Fetched from network: ${url}`);
-
-    await extractLiveStandings(data);
-
-    return 0;
-  } catch (error) {
-    console.error("Error fetching the HTML:", error);
-    throw error;
-  }
-}
-
-async function extractRows(html) {
+async function extractCurrentChampionshipStandings(html) {
   const $ = cheerio.load(html);
   const rows = [];
 
@@ -214,90 +191,8 @@ async function extractRows(html) {
   return rows;
 }
 
-async function extractLiveStandings(html) {
-  const $ = cheerio.load(html);
-
-  let LMP2 = [];
-  let LMP3 = [];
-  let GT = [];
-
-  $(".table-race").each((index, element) => {
-    const pos = $(element).find(".pos").text().trim();
-    const number = $(element).find(".ranking").text().trim();
-    const classs = $(element).find(".class").text().trim();
-
-    if (pos == "" || number == "") {
-    } else {
-      let row = {
-        position: pos,
-        number: number,
-        class: classs,
-      };
-
-      if (classs == "LM P2") {
-        LMP2.push(row);
-      } else {
-        if (classs == "LM P3") {
-          LMP3.push(row);
-        } else {
-          GT.push(row);
-        }
-      }
-    }
-  });
-
-  console.log(JSON.stringify(LMP2));
-
-  return [
-    { class: "LMP2", cars: LMP2 },
-    { class: "LMP3", cars: LMP3 },
-    { class: "GT", cars: GT },
-  ];
-}
-
-async function fetchCurrentChampionshipStandings2() {
-  const browser = await chromium.launch({ headless: true });
-  const page = await browser.newPage();
-
-  let infos = [];
-  try {
-    // Navigation vers la page
-    await page.goto(
-      "https://www.asianlemansseries.com/calendar/2024-2025/teams-championship",
-      {
-        waitUntil: "networkidle",
-      }
-    );
-
-    // Attente du chargement du tableau des résultats
-    await page.waitForSelector(".table-results", { timeout: 10000 });
-
-    // Extraction des données
-    const results = await page.evaluate(() => {
-      const infos = Array.from(document.querySelectorAll(".table-results"));
-      return infos.map((row) => {
-        const cells = row.querySelectorAll("row");
-        return {
-          pos: cells[0]?.textContent.trim(),
-          number: cells[1]?.textContent.trim(),
-          team: cells[2]?.textContent.trim(),
-          cat: cells[5]?.textContent.trim(),
-          car: cells[4]?.textContent.trim(),
-          pts: cells[12]?.textContent.trim(),
-        };
-      });
-    });
-  } catch (error) {
-    console.error("Erreur lors du scraping:", error);
-  } finally {
-    // Fermeture du navigateur
-    await browser.close();
-  }
-
-  return infos;
-}
-
-async function fetchLiveStandings2() {
+/**PLAYWRIGHT */
+async function fetchLiveStandings() {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
   let LMP2 = [];
@@ -324,9 +219,6 @@ async function fetchLiveStandings2() {
         };
       });
     });
-
-    // Affichage des résultats
-    console.log("Résultats de la course :");
 
     for (let i = 0; i < results.length; i++) {
       let info = {
@@ -376,7 +268,7 @@ io.on("connection", function (socket) {
     "getCurrentChampionshipStandings",
     async (championship, callback) => {
       console.log("getCurrentChampionshipStandings requested");
-      //let championshipRankings = await championshipRankingsScrap(championship);
+
       let championshipRankings = await fetchCurrentChampionshipStandings();
 
       callback(championshipRankings);
@@ -386,16 +278,9 @@ io.on("connection", function (socket) {
 
   socket.on("getLiveStandings", async (championship, callback) => {
     console.log("getLiveStandings clicked");
-    //let liveStandings = await liveStandingsScrap(championship);
-    let liveStandings = await fetchLiveStandings2();
+
+    let liveStandings = await fetchLiveStandings();
 
     callback(liveStandings);
   });
-
-  /*
-  fetchCurrentChampionshipStandings(
-    "https://www.asianlemansseries.com/calendar/2024-2025/teams-championship"
-  );*/
-
-  //fetchLiveStandings("https://live.asianlemansseries.com/en/live");
 });

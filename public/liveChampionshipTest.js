@@ -29,7 +29,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     currentChampionshipRankings = JSON.parse(
       localStorage.getItem("currentChampionshipRankings") || "[]"
     );
-    //console.log("cc : " + JSON.stringify(currentChampionshipRankings));
   }
 
   function updateLiveRankingsDisplay(category, rankings, table) {
@@ -64,8 +63,6 @@ document.addEventListener("DOMContentLoaded", async function () {
           "currentChampionshipRankings",
           JSON.stringify(currentChampionshipRankings)
         );
-
-        //console.log("getCurrentChampionshipStandings done lct js");
       }
     );
   }
@@ -84,10 +81,8 @@ document.addEventListener("DOMContentLoaded", async function () {
       currentChampionshipRankings.length < 1 ||
       !currentChampionshipRankings
     ) {
-      //console.log("no cc data");
       await getCurrentChampionshipStandings(selectedChampionship);
     } else {
-      //console.log("cc data loaded");
     }
 
     let status = document.getElementById("requestStatus");
@@ -99,7 +94,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         '<tr><th id="liveRankingsCategory">CAT.</th><th id="liveRankingsPosition">POS.</th><th id="liveRankingsNumber">CAR</th><th>TEAM</th><th id="liveRankingsPoints">PTS.</th></tr>';
     }
 
-    setTimeout(function () {}, 3000);
     socket.emit(
       "getLiveStandings",
       selectedChampionship,
@@ -107,25 +101,10 @@ document.addEventListener("DOMContentLoaded", async function () {
         try {
           currentLiveStandings = liveStandings;
 
-          /*
-        console.log(liveStandings[0].class);
-        console.log(liveStandings[0].cars[0].position);
-        
-        for (let i = 0; i < liveStandings.length; i++) {
-          data2.innerHTML += "<div>[" + liveStandings[i].class + "]</div>";
-
-          for (let j = 0; j < liveStandings[i].cars.length; j++) {
-            let car = liveStandings[i].cars[j];
-            data2.innerHTML +=
-              "<div>POS: " + car.position + " - #" + car.number + "</div>";
-          }
-        }
-        */
-
           var updatedChampionshipStandings = structuredClone(
             currentChampionshipRankings
           );
-          console.log("ucs " + JSON.stringify(updatedChampionshipStandings));
+
           for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 10; j++) {
               let currentCar = liveStandings[i].cars[j];
@@ -183,17 +162,10 @@ document.addEventListener("DOMContentLoaded", async function () {
           LMP3ChampionshipRankings.sort(comparePoints);
           GTChampionshipRankings.sort(comparePoints);
 
-          /*
-        console.log("updated P2: " + JSON.stringify(LMP2ChampionshipRankings));
-        console.log("updated P3: " + JSON.stringify(LMP3ChampionshipRankings));
-        console.log("updated GT: " + JSON.stringify(GTChampionshipRankings));
-        */
-
           updateLiveRankingsDisplay("LMP2", LMP2ChampionshipRankings, "1");
           updateLiveRankingsDisplay("LMP3", LMP3ChampionshipRankings, "2");
           updateLiveRankingsDisplay("GT", GTChampionshipRankings, "3");
 
-          //console.log("getLiveStandings done lct js");
           status.innerHTML = "";
         } catch (error) {
           console.error(error);

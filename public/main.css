@@ -16,13 +16,28 @@
 		 url("Mattone-150.woff") format("woff");
 }
 
+@keyframes slideInFromLeft {
+    0% {
+      transform: translateY(-100%);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+
 body {
     font-family: 'Inria Sans', Helvetica, sans-serif;
-    background-color:rgb(54, 54, 54);
+    background-color:rgb(31, 31, 31);
     margin:0;
     color:white;
     overflow-y: scroll; /* Show vertical scrollbar */
     /*background: radial-gradient(circle, rgba(45,45,45,1) 80%, rgba(38,38,38,1) 100%);*/
+    /*background-image: url(./bg1.png);*/
+
+    background-color: #e5e5f7;
+    background-image: radial-gradient(#888888 0.5px, #161616 0.5px);
+    background-size: 40px 40px;
+
 }
 
 a{
@@ -130,14 +145,16 @@ a{
     width:10%;
 }
 
-#liveRankingsTable tr:nth-child(odd) {
+#liveRankingsTable tr:nth-child(odd):not(:first-child) {
     background-color: rgba(0, 0, 0, 0.8);
     color: #fff;
+    animation: 0.25s ease-out 0s 1 slideInFromLeft;
 }
 
 #liveRankingsTable tr:nth-child(even) {
     background-color: rgba(0, 0, 0, 0.6);
     color: #fff;
+    animation: 0.25s ease-out 0s 1 slideInFromLeft;
 }
 
 .cellLMP2{
@@ -162,12 +179,13 @@ a{
 }
 
 .pointsValue{
-    color:rgb(0, 0, 0);
+/*    color:rgb(0, 0, 0);
     background-color: white;
     padding:3px;
     border-radius: 5px;
-    font-weight: bold;
+    font-weight: bold;*/
 }
+
 
 #getLiveStandings{
     background-color: white;
@@ -177,7 +195,8 @@ a{
     vertical-align: auto;
     text-align: center;
     margin: 10px 0;
-    cursor:pointer
+    cursor:pointer;
+  
 }
 
 #getLiveStandings:hover{
